@@ -1,64 +1,109 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+
+const API_URL = "/api/sorry";
+
+interface SorryResponse {
+  reason: string;
+}
 
 export default function Home() {
+  const [sorry, setSorry] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const fetchSorry = async () => {
+    setLoading(true);
+    setError(null);
+    setCopied(false);
+    try {
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data: SorryResponse = await res.json();
+      setSorry(data.reason);
+    } catch {
+      setError("Failed to fetch your apology. The universe doesn't care enough.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyToClipboard = async () => {
+    if (!sorry) return;
+    try {
+      await navigator.clipboard.writeText(sorry);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard not available
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-950 font-sans text-zinc-100">
+      <main className="flex flex-col flex-1 w-full max-w-2xl items-center justify-center px-6 py-16 text-center">
+        <div className="mb-8">
+          <h1 className="text-5xl sm:text-6xl font-bold tracking-tight mb-2">
+            🖕
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+            Zero Fucks Given
+          </h2>
+          <p className="text-zinc-500 mt-2 text-sm">
+            as a Service
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="w-full mb-8 min-h-[120px] flex items-center justify-center">
+          {loading ? (
+            <p className="text-zinc-500 animate-pulse">Generating your apology...</p>
+          ) : error ? (
+            <p className="text-red-400">{error}</p>
+          ) : sorry ? (
+            <blockquote className="text-2xl sm:text-4xl leading-relaxed text-white font-semibold">
+              {sorry}
+            </blockquote>
+          ) : (
+            <p className="text-zinc-500">
+              Press the button to receive your professionally indifferent apology.
+            </p>
+          )}
         </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 items-center">
+          <button
+            onClick={fetchSorry}
+            disabled={loading}
+            className="h-12 px-6 rounded-full bg-zinc-100 text-zinc-950 font-medium transition-colors hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? "Loading..." : sorry ? "Get Another One" : "I Don't Care"}
+          </button>
+
+          {sorry && !loading && (
+            <button
+              onClick={copyToClipboard}
+              className="h-12 px-6 rounded-full border border-solid border-zinc-700 transition-colors hover:bg-zinc-800"
+            >
+              {copied ? "Copied!" : "Copy"}
+            </button>
+          )}
+        </div>
+
+        <footer className="mt-16 text-xs text-zinc-600">
+          <p>
+            Created by{" "}
+            <a
+              href="https://downormal.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-zinc-400"
+            >
+              Anugrah Surya Putra - downormal.dev
+            </a>
+          </p>
+        </footer>
       </main>
     </div>
   );
