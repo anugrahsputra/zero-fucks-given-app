@@ -10,9 +10,10 @@ export async function GET() {
     }
     const data = await res.json();
     return NextResponse.json(data);
-  } catch {
+  } catch (error) {
+    console.error("Backend fetch failed:", error);
     return NextResponse.json(
-      { error: "Failed to fetch apology" },
+      { error: "Failed to fetch apology", details: String(error) },
       { status: 502 }
     );
   }
