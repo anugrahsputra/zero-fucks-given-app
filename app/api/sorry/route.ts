@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.BACKEND_URL || "https://zfgaas.downormal.dev/sorry";
+const BACKEND_URL =
+  process.env.BACKEND_URL || "https://zfgaas.downormal.dev/sorry";
 
 export async function GET() {
   try {
@@ -14,7 +15,7 @@ export async function GET() {
     console.error("Backend fetch failed:", error);
     return NextResponse.json(
       { error: "Failed to fetch apology", details: String(error) },
-      { status: 502 }
+      { status: 502 },
     );
   }
 }
